@@ -73,9 +73,9 @@ postPayload :: Text -> Notice -> IO ()
 postPayload token notice = do
   args <- getArgs
   case args == ["-n"] of
-    False -> do
-      putStrLn (T.concat ["+ Pretending (-n) to post ", (decodeUtf8 . encode) notice])
     True -> do
+      putStrLn (T.concat ["+ Pretending (-n) to post ", (decodeUtf8 . encode) notice])
+    False -> do
       r <- post (T.unpack url) (encode notice)
       putStrLn (decodeUtf8 $ r ^. responseBody)
     where
