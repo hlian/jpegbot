@@ -13,6 +13,7 @@ import qualified Data.Map as M
 import qualified Data.Text.Format as F
 import           Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy as T
+import           Data.Text.Lazy.Encoding (decodeUtf8, encodeUtf8)
 import           Data.Text.Lazy.IO
 import           Data.Word8
 import           Network.HTTP.Types (status200)
