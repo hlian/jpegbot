@@ -34,7 +34,7 @@ instance ToJSON Notice where
     object [ "channel" .= T.concat ["#", channel]
            , "icon_emoji" .= T.concat [":", emoji, ":"]
            , "parse" .= String "full"
-           , "username" .= String "tacobot"
+           , "username" .= String "jpgtobot"
            , "text" .= text
            ]
 
