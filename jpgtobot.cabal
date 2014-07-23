@@ -19,26 +19,19 @@ executable jpgtobot
   main-is:             Main.hs
   -- other-modules:       
   -- other-extensions:    
-  build-depends:       aeson >= 0.7.0.6,
+  build-depends:
                        word8 >= 0.1.0,
                        attoparsec >= 0.11.3.4,
                        wreq
-                     , mtl
                      , base
                      , text-format
-                     , transformers
-                     , containers
                      , bytestring
-                     , json
                      , utf8-string
                      , text
-                     , directory
                      , lens
-                     , EitherT >= 0.2.0
-                     , random >= 1.0.1.1
-                     , array >= 0.4.0.1
                      , warp >=3.0 && <3.1
                      , http-types >0.8 && <0.9
                      , wai >=3.0 && <3.1
+                     , linklater
   -- hs-source-dirs:      
   default-language:    Haskell2010
