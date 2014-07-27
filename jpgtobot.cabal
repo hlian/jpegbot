@@ -19,7 +19,8 @@ executable jpgtobot
   main-is:             Main.hs
   -- other-modules:
   -- other-extensions:
-  build-depends:       word8 >= 0.1.0
+  build-depends:       aeson >= 0.7.0.6 && <0.8,
+                       word8 >= 0.1.0
                      , attoparsec >= 0.11.3.4
                      , wreq
                      , base
