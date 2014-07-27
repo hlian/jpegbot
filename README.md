@@ -1,7 +1,7 @@
 **For centuries, people have wondered**: "What's the fastest way to get a JPEG into a Slack channel?" Scientists now believe that **jpgtobot** is the answer. To verify these findings, please
 
 * Install Haskell ([Windows](http://www.haskell.org/platform/), [Mac](http://ghcformacosx.github.io/), and [Linux](https://gist.githubusercontent.com/hlian/b5a975252997cb3e0020/raw/e4ecab3042225d321a88ee74e804c38ead38ed52/gistfile1.txt));
-* `git clone https://github.com/hlian/jpgtobot/'
+* `git clone https://github.com/hlian/jpgtobot/`
 * `cd jpgtobot`
 * `cabal sandbox init`
 * `cabal install --only-dep -j` (meanwhile...)
