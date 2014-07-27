@@ -28,8 +28,6 @@ executable jpgtobot
                      , text
                      , lens
                      , warp >=3.0 && <3.1
-                     , http-types >0.8 && <0.9
-                     , wai >=3.0 && <3.1
                      , linklater >= 2.0.0.0 && < 2.1.0.0
                      , base-prelude
   -- hs-source-dirs:
