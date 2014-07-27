@@ -8,7 +8,7 @@
 * Create a Slack incoming token
 * Write it down in a one-line `token` file
 * `cabal run`
-* Use [ngrok](https://ngrok.com/) to open a tunnel to port 83 e.g. `brew install ngrok; ngrok -authtoken yourtokenhere 83`
+* Use [ngrok](https://ngrok.com/) to open a tunnel to port 3000 e.g. `brew install ngrok; ngrok -authtoken yourtokenhere 3000`
 * Write down the ngrok URL
 * Teach Slack the `/jpgto` slash command and have it point to the URL
 * Type `/jpgto corgi`
