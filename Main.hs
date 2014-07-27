@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings, NoImplicitPrelude #-}
+-- If writing Slack bots intrigues you, check out: https://github.com/hlian/linklater
 import BasePrelude hiding (words, intercalate)
 import Control.Lens ((^.))
 import Data.Attoparsec.Text.Lazy
