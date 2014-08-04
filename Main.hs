@@ -20,7 +20,7 @@ jpgto (Just (Command user channel (Just text))) = do
   case (debug, message) of
     (True, _) -> putStrLn ("+ Pretending to post " <> (unpack . decodeUtf8 . encode) message) >> return ""
     (False, Just m) -> config' >>= say m >> return ""
-    (False, Nothing) -> return "Something went wrong!"
+    (False, Nothing) -> return ("No JPEG found for " <> subdomain <> ", sorry!")
   where config' = (Config "trello.slack.com" . filter (/= '\n') . pack) <$> readFile "token"
         subdomain = (intercalate "." . fmap (filter isLetter . filter isAscii) . words) text
         messageOf url = FormattedMessage (EmojiIcon "gift") "jpgtobot" channel [FormatAt user, FormatLink url (subdomain <> ".jpg.to>")]
