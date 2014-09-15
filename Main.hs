@@ -4,7 +4,7 @@ import BasePrelude hiding (words, intercalate, filter)
 import Control.Lens ((^.))
 import Data.Aeson (encode)
 import Data.Attoparsec.Text.Lazy
-import Data.Char (isLetter, isAscii)
+import Data.Char (isAlphaNum, isAscii)
 import Data.Text.Lazy
 import Data.Text.Lazy.Encoding (decodeUtf8)
 import Network.Linklater (say, slashSimple, Command(..), Config(..), Message(..), Icon(..), Format(..))
@@ -22,7 +22,7 @@ jpgto (Just (Command user channel (Just text))) = do
     (False, Just m) -> config' >>= say m >> return ""
     (False, Nothing) -> return ("No JPEG found for " <> subdomain <> ", sorry!")
   where config' = (Config "trello.slack.com" . filter (/= '\n') . pack) <$> readFile "token"
-        subdomain = (intercalate "." . fmap (filter isLetter . filter isAscii) . words) text
+        subdomain = (intercalate "." . fmap (filter isAlphaNum. filter isAscii) . words) text
         messageOf url = FormattedMessage (EmojiIcon "gift") "jpgtobot" channel [FormatAt user, FormatLink url (subdomain <> ".jpg.to")]
         debug = False
 jpgto _ = return "Type more! (Did you know? jpgtobot is only 26 lines of Haskell. <https://github.com/hlian/jpgtobot/blob/master/Main.hs>)"
