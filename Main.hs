@@ -2,20 +2,21 @@
 
 -- If writing Slack bots intrigues you, check out: https://github.com/hlian/linklater
 
-import BasePrelude hiding (words, intercalate, filter)
+import BasePrelude hiding (words, intercalate)
 import Control.Lens ((^.))
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Maybe (MaybeT, runMaybeT)
 import Data.Aeson (encode)
 import Data.ByteString.Lazy (ByteString)
 import Data.Char (isAlphaNum, isAscii)
+import qualified Data.Text.Lazy as T
+import Data.Text.Lazy (Text, pack, unpack)
 import Data.Text.Lazy.Encoding (decodeUtf8)
 import Network.HTTP.Base (urlEncode)
 import Network.Wai.Handler.Warp (run)
 
 -- Naked imports.
 import Data.Attoparsec.Text.Lazy
-import Data.Text.Lazy
 import Network.Linklater
 import Network.Wreq hiding (params)
 
@@ -24,28 +25,28 @@ findUrl =
   encode . parse (manyTill (notChar '\n') (string "src=\"") *> takeTill (== '"')) . decode
   where
     encode =
-      fmap fromStrict . maybeResult
+      fmap T.fromStrict . maybeResult
     decode =
       decodeUtf8
 
 configIO :: IO Config
 configIO = do
-  token <- (filter (/= '\n') . pack) <$> readFile "token"
+  token <- T.filter (/= '\n') . pack <$> readFile "token"
   return $ Config "trello.slack.com" token
 
 urlOf :: Text -> Text -> String
-urlOf query options =
-  "http://" <> urlEncode (unpack query) <> ".jpg.to/" <> unpack options
+urlOf query path =
+  "http://" <> urlEncode (unpack query) <> ".jpg.to/" <> unpack path
 
 parseText :: Text -> Maybe (Text, Text)
 parseText text =
-  f (strip <$> (splitOn "--" text))
+  f (filter (/= "") (T.strip <$> T.splitOn "--" text))
   where
     f []             = mzero
     f [raw]          = return (parseRaw raw, "")
-    f [raw, options] = return (parseRaw raw, options)
+    f [raw, options] = return (parseRaw raw, "/" <> options)
     f _              = mzero
-    parseRaw         = intercalate "." . words
+    parseRaw         = T.intercalate "." . T.words
 
 liftMaybe :: Maybe a -> MaybeT IO a
 liftMaybe = maybe mzero return
@@ -54,10 +55,10 @@ messageOfCommand :: Command -> MaybeT IO Message
 messageOfCommand (Command _ _ (Nothing)) =
   mzero
 messageOfCommand (Command user channel (Just text)) = do
-  (query, options) <- liftMaybe $ parseText text
-  response <- liftIO $ get (urlOf query options)
-  let formatsOf url = [FormatAt user, FormatLink url (query <> ".jpg.to/" <> options)]
-  liftMaybe $ (messageOf . formatsOf) <$> findUrl (response ^. responseBody)
+  (query, path) <- liftMaybe $ parseText text
+  response <- liftIO $ get (urlOf query path)
+  let formatsOf url = [FormatAt user, FormatLink url (query <> ".jpg.to" <> path)]
+  liftMaybe $ messageOf . formatsOf <$> findUrl (response ^. responseBody)
   where
     messageOf =
       FormattedMessage (EmojiIcon "gift") "jpgtobot" channel
@@ -70,15 +71,15 @@ jpgto (Just command) = do
   putStrLn ("+ Incoming command: " <> show command)
   config <- configIO
   message <- (runMaybeT . messageOfCommand) command
+  putStrLn ("+ Outgoing messsage: " <> show (encode <$> message))
   case (debug, message) of
-    (True, _) -> do
-      putStrLn ("+ Outgoing messsage: " <> show (encode <$> message))
-      return ""
     (False, Just m) -> do
       say m config
       return ""
     (False, Nothing) ->
       return "*FRIZZLE* ERROR PROCESSING INPUT; BEGIN SELF-DETONATION; PLEASE FILE ISSUE AT <https://github.com/hlian/jpgtobot>"
+    _ ->
+      return ""
   where
     debug = False
 
