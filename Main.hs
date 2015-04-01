@@ -1,42 +1,44 @@
-{-# LANGUAGE OverloadedStrings, NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 -- If writing Slack bots intrigues you, check out: https://github.com/hlian/linklater
 
-import BasePrelude hiding (words, intercalate)
-import Control.Lens ((^.))
-import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Trans.Maybe (MaybeT, runMaybeT)
-import Data.Aeson (encode)
-import Data.ByteString.Lazy (ByteString)
-import Data.Char (isAlphaNum, isAscii)
-import qualified Data.Text.Lazy as T
-import Data.Text.Lazy (Text, pack, unpack)
-import Data.Text.Lazy.Encoding (decodeUtf8)
-import Network.HTTP.Base (urlEncode)
-import Network.Wai.Handler.Warp (run)
+import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
+
+import           Control.Lens ((^.))
+import           Control.Monad.IO.Class (liftIO)
+import           Control.Monad.Trans.Maybe (MaybeT, runMaybeT)
+import           Data.Aeson (encode)
+import           Data.ByteString.Lazy (ByteString)
+import           Data.Char (isAlphaNum, isAscii)
+import           Data.Text (Text)
+import           Data.Text.Lazy.Encoding (decodeUtf8)
+import           Network.HTTP.Base (urlEncode)
+import           Network.Wai.Handler.Warp (run)
 
 -- Naked imports.
-import Data.Attoparsec.Text.Lazy
-import Network.Linklater
-import Network.Wreq hiding (params)
+import           BasePrelude hiding (words, intercalate)
+import           Data.Attoparsec.Text.Lazy
+import           Network.Linklater
+import           Network.Wreq hiding (params)
 
-findUrl :: ByteString -> Maybe Text
-findUrl =
+findURL :: ByteString -> Maybe Text
+findURL =
   encode . parse (manyTill (notChar '\n') (string "src=\"") *> takeTill (== '"')) . decode
   where
     encode =
-      fmap T.fromStrict . maybeResult
+      maybeResult
     decode =
       decodeUtf8
 
 configIO :: IO Config
-configIO = do
-  token <- T.filter (/= '\n') . pack <$> readFile "token"
-  return $ Config "trello.slack.com" token
+configIO =
+  Config <$> (T.filter (/= '\n') . T.pack <$> readFile "hook")
 
 urlOf :: Text -> Text -> String
 urlOf query path =
-  "http://" <> urlEncode (unpack query) <> ".jpg.to/" <> unpack path
+  "http://" <> urlEncode (T.unpack query) <> ".jpg.to/" <> T.unpack path
 
 parseText :: Text -> Maybe (Text, Text)
 parseText text =
@@ -52,13 +54,13 @@ liftMaybe :: Maybe a -> MaybeT IO a
 liftMaybe = maybe mzero return
 
 messageOfCommand :: Command -> MaybeT IO Message
-messageOfCommand (Command _ _ (Nothing)) =
+messageOfCommand (Command "jpeg" _ _ (Nothing)) =
   mzero
-messageOfCommand (Command user channel (Just text)) = do
-  (query, path) <- liftMaybe $ parseText text
-  response <- liftIO $ get (urlOf query path)
-  let formatsOf url = [FormatAt user, FormatLink url (query <> ".jpg.to" <> path)]
-  liftMaybe $ messageOf . formatsOf <$> findUrl (response ^. responseBody)
+messageOfCommand (Command "jpeg" user channel (Just text)) = do
+  (query, path) <- liftMaybe (parseText text)
+  response <- liftIO (get (urlOf query path))
+  url <- liftMaybe (findURL $ response ^. responseBody)
+  return (messageOf [FormatAt user, FormatLink url (query <> ".jpg.to" <> path)])
   where
     messageOf =
       FormattedMessage (EmojiIcon "gift") "jpgtobot" channel
