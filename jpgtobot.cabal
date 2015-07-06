@@ -16,6 +16,7 @@ executable jpgtobot
                      , base
                      , base-prelude
                      , bytestring
+                     , jpg-to
                      , lens
                      , linklater
                      , text
