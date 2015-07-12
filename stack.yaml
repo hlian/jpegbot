@@ -8,4 +8,4 @@ packages:
     git: git@github.com:hlian/jpg-cli
     commit: bbf4
 extra-deps: []
-resolver: lts-2.17
+resolver: nightly-2015-07-10
